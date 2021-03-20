@@ -17,16 +17,18 @@ int main(int argc, const char * argv[]) {
                         { '*', '*', '0', '*', '*' },
                         { '*', '*', '*', '*', '*' }
     };
-    
+
+    //uncomment to run and test!!!
     
 //    breadth first search
-//    Algorithm algo(Node(3, 2, 0, NULL), Node (0, 2, 0, NULL));
-//    cout << algo.breathFirstSearch(grid) << endl;
+//    Algorithm algo(std::make_shared<Node>(0, 0, 0, nullptr));
+//    int length = algo.breathFirstSearch(grid);
+//    cout << "Shortest distance length: " << length << endl;
+    
     
 //    a-star search
-    Algorithm algo(Node(0,0), Node(2, 4));
-
-    algo.aStarSearch(grid);
+//    Algorithm algo(make_shared<Node>(0, 0), make_shared<Node>(2, 4));
+//    algo.aStarSearch(grid);
     
     
     

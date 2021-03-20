@@ -18,10 +18,14 @@ using namespace std;
 
 Algorithm::Algorithm(){}
 
-Algorithm::Algorithm (Node startingPosition, Node finalPosition) {
+Algorithm::Algorithm (shared_ptr<Node> startingPosition) {
+    this->startingPosition = startingPosition;
+    
+}
+
+Algorithm::Algorithm(shared_ptr<Node> startingPosition, shared_ptr<Node> finalPosition) {
     this->startingPosition = startingPosition;
     this->finalPosition = finalPosition;
-    
 }
 
 int Algorithm::breathFirstSearch(char maze[][C]) {
@@ -38,25 +42,21 @@ int Algorithm::breathFirstSearch(char maze[][C]) {
         }
     }
 
-    queue<Node*> myQueue;
+    queue<shared_ptr<Node>> myQueue;
     
-    Node* prev = new Node(startingPosition.getRow(), startingPosition.getCol(), 0, NULL);
-    startingPosition.setPrev(prev);
-    myQueue.push(&startingPosition);
-    visited[startingPosition.getRow()][startingPosition.getCol()] = true;
+    myQueue.push(startingPosition);
+    visited[startingPosition->getRow()][startingPosition->getCol()] = true;
     
     
     
     
     while (!myQueue.empty()) {
         
-        
-        
-        Node* temp = myQueue.front();
+        shared_ptr<Node> temp = myQueue.front();
         
         if (maze[temp->getRow()][temp->getCol()] == 'd') {
             int distance = temp->getDistance();
-            while (temp->getPrev() != NULL) {
+            while (temp->getPrev() != nullptr) {
                 cout << "temp row: " << temp->getRow() << " temp col: " << temp->getCol() << endl;
                 
                 temp = temp->getPrev();
@@ -69,7 +69,7 @@ int Algorithm::breathFirstSearch(char maze[][C]) {
         if (temp->getRow() - 1 >= 0
             && visited[temp->getRow() - 1][temp->getCol()] == false) {
             
-            Node* nodePtr = new Node(temp->getRow() - 1, temp->getCol(), temp->getDistance() + 1, temp);
+            shared_ptr<Node> nodePtr = make_shared<Node>(temp->getRow() - 1, temp->getCol(), temp->getDistance() + 1, temp);
             myQueue.push(nodePtr);
             visited[temp->getRow() - 1][temp->getCol()] = true;
         }
@@ -77,7 +77,7 @@ int Algorithm::breathFirstSearch(char maze[][C]) {
         if (temp->getRow() + 1 < R
             && visited[temp->getRow() + 1][temp->getCol()] == false) {
 
-            Node* nodePtr = new Node(temp->getRow() + 1, temp->getCol(), temp->getDistance() + 1, temp);
+            shared_ptr<Node> nodePtr = make_shared<Node>(temp->getRow() + 1, temp->getCol(), temp->getDistance() + 1, temp);
             myQueue.push(nodePtr);
             visited[temp->getRow() + 1][temp->getCol()] = true;
         }
@@ -85,7 +85,7 @@ int Algorithm::breathFirstSearch(char maze[][C]) {
         if (temp->getCol() - 1 >= 0
             && visited[temp->getRow()][temp->getCol() - 1] == false) {
             
-            Node* nodePtr = new Node(temp->getRow(), temp->getCol() - 1, temp->getDistance() + 1, temp);
+            shared_ptr<Node> nodePtr = make_shared<Node>(temp->getRow(), temp->getCol() - 1, temp->getDistance() + 1, temp);
             myQueue.push(nodePtr);
             visited[temp->getRow()][temp->getCol() - 1] = true;
         }
@@ -93,7 +93,7 @@ int Algorithm::breathFirstSearch(char maze[][C]) {
         if (temp->getCol() + 1 < C
             && visited[temp->getRow()][temp->getCol() + 1] == false) {
             
-            Node* nodePtr = new Node(temp->getRow(), temp->getCol() + 1, temp->getDistance() + 1, temp);
+            shared_ptr<Node> nodePtr = make_shared<Node>(temp->getRow(), temp->getCol() + 1, temp->getDistance() + 1, temp);
             myQueue.push(nodePtr);
             visited[temp->getRow()][temp->getCol() + 1] = true;
         }
@@ -112,8 +112,8 @@ int Algorithm::aStarSearch(char maze[][C]) {
         for (int j = 0; j < C; j++) {
             
             
-            int tempGCost = abs((startingPosition.getRow() - i)) + abs((startingPosition.getCol() - j));
-            int tempHCost = abs((finalPosition.getRow() - i)) + abs((finalPosition.getCol() - j));
+            int tempGCost = abs((startingPosition->getRow() - i)) + abs((startingPosition->getCol() - j));
+            int tempHCost = abs((finalPosition->getRow() - i)) + abs((finalPosition->getCol() - j));
             grid[i][j].setRowCol(i, j);
             grid[i][j].setGCost(tempGCost);
             grid[i][j].setHCost(tempHCost);
@@ -122,27 +122,19 @@ int Algorithm::aStarSearch(char maze[][C]) {
             
         }
     }
-    
-    for (int i = 0; i < R; i++) {
-        for (int j = 0; j < C; j++) {
-            cout << grid[i][j].getDistance() << " ";
-
-        }
-        cout << endl;
-    }
                 
     
     
     //start
     
-    Node current = grid[startingPosition.getRow()][startingPosition.getCol()];
+    Node current = grid[startingPosition->getRow()][startingPosition->getCol()];
 
     grid[current.getRow()][current.getCol()].setGCost(0);
-    grid[current.getRow()][current.getCol()].setHCost(getDistance(current, finalPosition));
+    grid[current.getRow()][current.getCol()].setHCost(getDistance(current, *finalPosition));
     grid[current.getRow()][current.getCol()].setDistance();
 
-    Node* ptr = new Node(startingPosition.getRow(), startingPosition.getCol(), grid[startingPosition.getRow()][startingPosition.getCol()].getDistance(), NULL);
-    grid[startingPosition.getRow()][startingPosition.getCol()].setPrev(ptr);
+    shared_ptr<Node> ptr = make_shared<Node>(startingPosition->getRow(), startingPosition->getCol(), grid[startingPosition->getRow()][startingPosition->getCol()].getDistance(), nullptr);
+    grid[startingPosition->getRow()][startingPosition->getCol()].setPrev(ptr);
 
     open.insert(make_pair(grid[current.getRow()][current.getCol()], 0));
     cout << endl;
@@ -156,11 +148,12 @@ int Algorithm::aStarSearch(char maze[][C]) {
         closed[current] = 0;
 
 
-        if (current == grid[finalPosition.getRow()][finalPosition.getCol()]) {
-            cout << endl << "finished" << endl;
-            Node* status = &current;
+        if (current == grid[finalPosition->getRow()][finalPosition->getCol()]) {
             
-            while (status->getPrev() != NULL) {
+            shared_ptr<Node> temp = make_shared<Node>(current.getRow(), current.getCol(), current.getDistance(), current.getPrev());
+            shared_ptr<Node> status = temp;
+            
+            while (status->getPrev() != nullptr) {
 
                 status = status->getPrev();
                 cout << "temp row: " << status->getRow() << " temp col: " << status->getCol() << endl;
@@ -179,10 +172,10 @@ int Algorithm::aStarSearch(char maze[][C]) {
 
                     grid[current.getRow() - 1][current.getCol()].setRowCol(current.getRow() - 1, current.getCol());
                     grid[current.getRow() - 1][current.getCol()].setGCost(distance);
-                    grid[current.getRow() - 1][current.getCol()].setHCost(getDistance(grid[current.getRow() - 1][current.getCol()], finalPosition));
+                    grid[current.getRow() - 1][current.getCol()].setHCost(getDistance(grid[current.getRow() - 1][current.getCol()], *finalPosition));
                     grid[current.getRow() - 1][current.getCol()].setDistance();
 
-                    Node* ptr = new Node(current.getRow() - 1, current.getCol(), grid[current.getRow() - 1][current.getCol()].getDistance(), current.getPrev());
+                    shared_ptr<Node> ptr = make_shared<Node>(current.getRow() - 1, current.getCol(), grid[current.getRow() - 1][current.getCol()].getDistance(), current.getPrev());
                     grid[current.getRow() - 1][current.getCol()].setPrev(ptr);
 
                     if (open.find(grid[current.getRow() - 1][current.getCol()]) == open.end()) {
@@ -202,10 +195,10 @@ int Algorithm::aStarSearch(char maze[][C]) {
 
                     grid[current.getRow() + 1][current.getCol()].setRowCol(current.getRow() + 1, current.getCol());
                     grid[current.getRow() + 1][current.getCol()].setGCost(distance);
-                    grid[current.getRow() + 1][current.getCol()].setHCost(getDistance(grid[current.getRow() + 1][current.getCol()], finalPosition));
+                    grid[current.getRow() + 1][current.getCol()].setHCost(getDistance(grid[current.getRow() + 1][current.getCol()], *finalPosition));
                     grid[current.getRow() + 1][current.getCol()].setDistance();
 
-                    Node* ptr = new Node(current.getRow() + 1, current.getCol(), grid[current.getRow() + 1][current.getCol()].getDistance(), current.getPrev());
+                    shared_ptr<Node> ptr = make_shared<Node>(current.getRow() + 1, current.getCol(), grid[current.getRow() + 1][current.getCol()].getDistance(), current.getPrev());
                     grid[current.getRow() + 1][current.getCol()].setPrev(ptr);
 
                     if (open.find(grid[current.getRow() + 1][current.getCol()]) == open.end()) {
@@ -224,10 +217,10 @@ int Algorithm::aStarSearch(char maze[][C]) {
 
                     grid[current.getRow()][current.getCol() - 1].setRowCol(current.getRow(), current.getCol() - 1);
                     grid[current.getRow()][current.getCol() - 1].setGCost(distance);
-                    grid[current.getRow()][current.getCol() - 1].setHCost(getDistance(grid[current.getRow()][current.getCol() - 1], finalPosition));
+                    grid[current.getRow()][current.getCol() - 1].setHCost(getDistance(grid[current.getRow()][current.getCol() - 1], *finalPosition));
                     grid[current.getRow()][current.getCol() - 1].setDistance();
 
-                    Node* ptr = new Node(current.getRow(), current.getCol() - 1, grid[current.getRow()][current.getCol() - 1].getDistance(), current.getPrev());
+                    shared_ptr<Node> ptr = make_shared<Node>(current.getRow(), current.getCol() - 1, grid[current.getRow()][current.getCol() - 1].getDistance(), current.getPrev());
                     grid[current.getRow()][current.getCol() - 1].setPrev(ptr);
 
                     if (open.find(grid[current.getRow()][current.getCol() - 1]) == open.end()) {
@@ -246,10 +239,10 @@ int Algorithm::aStarSearch(char maze[][C]) {
 
                     grid[current.getRow()][current.getCol() + 1].setRowCol(current.getRow(), current.getCol() + 1);
                     grid[current.getRow()][current.getCol() + 1].setGCost(distance);
-                    grid[current.getRow()][current.getCol() + 1].setHCost(getDistance(grid[current.getRow()][current.getCol() + 1], finalPosition));
+                    grid[current.getRow()][current.getCol() + 1].setHCost(getDistance(grid[current.getRow()][current.getCol() + 1], *finalPosition));
                     grid[current.getRow()][current.getCol() + 1].setDistance();
 
-                    Node* ptr = new Node(current.getRow(), current.getCol() + 1, grid[current.getRow()][current.getCol() + 1].getDistance(), current.getPrev());
+                    shared_ptr<Node> ptr = make_shared<Node>(current.getRow(), current.getCol() + 1, grid[current.getRow()][current.getCol() + 1].getDistance(), current.getPrev());
                     grid[current.getRow()][current.getCol() + 1].setPrev(ptr);
 
                     if (open.find(grid[current.getRow()][current.getCol() + 1]) == open.end()) {

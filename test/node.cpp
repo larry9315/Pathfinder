@@ -6,13 +6,14 @@
 //
 
 #include <stdio.h>
+#include <memory>
 
 class Node {
 private:
     int row;
     int col;
     int distance;
-    Node* prev;
+    std::shared_ptr<Node> prev;
     
     
     //starting node distance
@@ -22,7 +23,7 @@ private:
 public:
     Node(){}
     
-    Node(int row, int col, int distance, Node* node) {
+    Node(int row, int col, int distance, std::shared_ptr<Node> node) {
         this->row = row;
         this->col = col;
         this->distance = distance;
@@ -51,11 +52,11 @@ public:
         return distance;
     }
     
-    Node* getPrev(){
+    std::shared_ptr<Node> getPrev(){
         return prev;
     }
     
-    void setPrev(Node* prev) {
+    void setPrev(std::shared_ptr<Node> prev) {
         this->prev = prev;
     }
     
@@ -79,14 +80,14 @@ public:
         distance = gCost + hCost;
     }
     
-    void operator = (const Node* node ) {
-        row = node->row;
-        col = node->col;
-        prev = node->prev;
+    void operator = (const Node& node ) {
+        row = node.row;
+        col = node.col;
+        prev = node.prev;
         
-        gCost = node->gCost;
-        hCost = node->hCost;
-        distance = node->distance;
+        gCost = node.gCost;
+        hCost = node.hCost;
+        distance = node.distance;
         
     }
     friend bool operator == (const Node& lhs, const Node& rhs) {

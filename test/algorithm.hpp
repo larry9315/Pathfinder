@@ -18,15 +18,17 @@ using namespace std;
 
 class Algorithm {
 private:
-    Node startingPosition;
-    Node finalPosition;
+    std::shared_ptr<Node> startingPosition;
+    std::shared_ptr<Node> finalPosition;
     
     
     
 public:
     Algorithm();
     
-    Algorithm(Node startingPosition, Node finalPosition);
+    Algorithm(std::shared_ptr<Node> startingPosition);
+    
+    Algorithm(shared_ptr<Node> startingPosition, shared_ptr<Node> finalPosition);
     
     int breathFirstSearch(char maze[][C]);
     
